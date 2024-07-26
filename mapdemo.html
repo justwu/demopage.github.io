@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XXX网站</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        #mapContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        #mapImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .coordinate-point {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #controlPanel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #coordinatesInput {
+            width: 300px;
+            height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div id="mapContainer">
+        <img id="mapImage" src="https://lzossfile.lzdjq.com/005/feedback/%E4%B8%93%20%E9%A2%98%20%E5%9B%BE_2024_7_25%2020_29_24%EF%BC%8816_9%EF%BC%89.jpg" alt="地图图片">
+    </div>
+    <div id="controlPanel">
+        <textarea id="coordinatesInput" ></textarea>
+        <br>
+        <button onclick="plotCoordinates()">点我.把坐标数据画到图上</button>
+    </div>
+
+    <script>
+        const westLongitude = 102.50000;
+        const eastLongitude = 100.71667;
+        const northLatitude = 26.50000;
+        const southLatitude = 24.21667;
+
+        function plotCoordinates() {
+            const mapContainer = document.getElementById('mapContainer');
+            const coordinatesInput = document.getElementById('coordinatesInput');
+            
+            let coordinates;
+            try {
+                coordinates = JSON.parse(coordinatesInput.value);
+            } catch (e) {
+                alert('无效的 JSON 格式。请检查输入。');
+                return;
+            }
+
+            // 清除之前的点
+            document.querySelectorAll('.coordinate-point').forEach(el => el.remove());
+
+            coordinates.forEach(coord => {
+                const [longitude, latitude] = coord.p;
+                if (!Array.isArray(coord.p) || coord.p.length !== 2) {
+                    console.error('Invalid coordinate format:', coord);
+                    return;
+                }
+
+                const x = ((westLongitude - longitude) / (westLongitude - eastLongitude)) * 100;
+                const y = ((northLatitude - latitude) / (northLatitude - southLatitude)) * 100;
+
+                const point = document.createElement('div');
+                point.className = 'coordinate-point';
+                point.style.left = `${x}%`;
+                point.style.top = `${y}%`;
+                mapContainer.appendChild(point);
+            });
+        }
+
+        // 页面初始化
+        document.getElementById('coordinatesInput').value = JSON.stringify([
+            {"p":[101.435,24.572]},
+            {"p":[101.23,24.73]},
+            {"p":[101.54,24.552]},
+            {"p":[100.984,25.774]}
+        ], null, 2);
+
+        // 初始加载时绘制坐标点
+        plotCoordinates();
+    </script>
+</body>
+</html>
